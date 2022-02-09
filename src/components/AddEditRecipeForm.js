@@ -1,6 +1,24 @@
 import { useState } from "react";
+import { useEffect } from "react";
 
-function AddEditRecipeForm({ handleAddRecipe }) {
+function AddEditRecipeForm({
+  existingRecipe,
+  handleAddRecipe,
+  handleUpdateRecipe,
+  handleEditRecipeCancel,
+}) {
+  useEffect(() => {
+    if (existingRecipe) {
+      setName(existingRecipe.name);
+      setCategory(existingRecipe.category);
+      setDirections(existingRecipe.directions);
+      setPublishDate(existingRecipe.publishDate.toISOString().split("T")[0]);
+      setIngredients(existingRecipe.ingredients);
+    } else {
+      resetForm();
+    }
+  }, [existingRecipe]);
+
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [publishDate, setPublishDate] = useState(
@@ -29,6 +47,10 @@ function AddEditRecipeForm({ handleAddRecipe }) {
       ingredients,
     };
 
+    if (existingRecipe) {
+      handleUpdateRecipe(newRecipe, existingRecipe.Id);
+    }
+
     handleAddRecipe(newRecipe);
   }
 
@@ -47,6 +69,14 @@ function AddEditRecipeForm({ handleAddRecipe }) {
 
     setIngredients([...ingredients, ingredientName]);
     setingredientName("");
+  }
+
+  function resetForm() {
+    setName("");
+    setCategory("");
+    setDirections("");
+    setPublishDate("");
+    setIngredients([]);
   }
 
   return (

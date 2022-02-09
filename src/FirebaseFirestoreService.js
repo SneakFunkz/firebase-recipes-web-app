@@ -9,6 +9,8 @@ const createDocument = (collection, document) => {
 const readDocuments = ({ collection, queries }) => {
   let collectionRef = firestore.collection(collection);
 
+  //if queries is passed as an argument to the readDocuments function
+  //only shows the queries with isPublished
   if (queries && queries.length > 0) {
     for (const query of queries) {
       debugger;
@@ -23,9 +25,14 @@ const readDocuments = ({ collection, queries }) => {
   return collectionRef.get();
 };
 
+const updateDocument = (collection, id, document) => {
+  return firestore.collection(collection).doc(id).update(document);
+};
+
 const FirebaseFirestoreService = {
   createDocument,
   readDocuments,
+  updateDocument,
 };
 
 export default FirebaseFirestoreService;

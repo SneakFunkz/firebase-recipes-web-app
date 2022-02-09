@@ -8,6 +8,7 @@ import FirebaseFirestoreService from "./FirebaseFirestoreService";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [currentRecipe, setCurrentRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
@@ -24,7 +25,8 @@ function App() {
   async function fetchRecipes() {
     const queries = [];
 
-    //only published can be shown
+    //if user is not authenticated
+    //only isPublished can be read
     if (!user) {
       queries.push({
         field: "isPublished",
@@ -42,7 +44,7 @@ function App() {
         queries: queries,
       });
 
-      //mreformats the data from the read call
+      //reformats the data from the read call
       const newRecipes = response.docs.map((recipeDoc) => {
         const id = recipeDoc.id;
 
@@ -89,6 +91,42 @@ function App() {
     } catch (error) {
       alert(error.message);
     }
+  }
+
+  async function handleUpdateRecipe(newRecipe, recipeId) {
+    try {
+      await FirebaseFirestoreService.updateDocument(
+        "recipes",
+        recipeId,
+        newRecipe
+      );
+
+      handleFetchRecipes();
+
+      alert(`successfully updated a recipe with an ID of ${recipeId}`);
+
+      //reset state of recipe being updated
+      //it it no longer being updated
+      setCurrentRecipe(null);
+    } catch (error) {
+      alert(error.message);
+      throw error;
+    }
+  }
+
+  function handleEditRecipeClick(recipeId) {
+    const selectedRecipe = recipes.find((recipe) => {
+      return recipe.id === recipeId;
+    });
+
+    if (selectedRecipe) {
+      setCurrentRecipe(selectedRecipe);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  }
+
+  function handleEditRecipeCancel() {
+    setCurrentRecipe(null);
   }
 
   function lookupCategoryLabel(categoryKey) {
@@ -139,6 +177,15 @@ function App() {
                       <div className="recipe-field">
                         Publish Date: {formatDate(recipe.publishDate)}
                       </div>
+                      {user ? (
+                        <button
+                          type="button"
+                          onClick={() => handleEditRecipeClick(recipe.id)}
+                          className="primary-button edit-button"
+                        >
+                          EDIT
+                        </button>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -150,7 +197,10 @@ function App() {
         {/* If the user is set/logged in, the AddEditRecipeForm renders */}
         {user ? (
           <AddEditRecipeForm
+            existingRecipe={currentRecipe}
             handleAddRecipe={handleAddRecipe}
+            handleUpdateRecipe={handleUpdateRecipe}
+            handleEditRecipeCancel={handleEditRecipeCancel}
           ></AddEditRecipeForm>
         ) : null}
       </div>
