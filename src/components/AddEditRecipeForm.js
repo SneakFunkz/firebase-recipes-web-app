@@ -5,6 +5,7 @@ function AddEditRecipeForm({
   existingRecipe,
   handleAddRecipe,
   handleUpdateRecipe,
+  handleDeleteRecipe,
   handleEditRecipeCancel,
 }) {
   useEffect(() => {
@@ -49,9 +50,9 @@ function AddEditRecipeForm({
 
     if (existingRecipe) {
       handleUpdateRecipe(newRecipe, existingRecipe.Id);
+    } else {
+      handleAddRecipe(newRecipe);
     }
-
-    handleAddRecipe(newRecipe);
   }
 
   function handleAddIngredient(e) {
@@ -84,7 +85,7 @@ function AddEditRecipeForm({
       onSubmit={handleRecipeFormSubmit}
       className="add-edit-recipe-form-container"
     >
-      <h2>Add a new Recipe</h2>
+      {existingRecipe ? <h2>Update recipe</h2> : <h2>Add a recipe</h2>}
       <div className="top-form-section">
         <div className="fields">
           <label className="recipe-label input-label">
@@ -196,10 +197,28 @@ function AddEditRecipeForm({
           </button>
         </div>
       </div>
-      <div className="active-buttons">
+      <div className="action-buttons">
         <button type="submit" className="primary-button action-button">
-          Create Recipe
+          {existingRecipe ? "Update Recipe" : "Create Recipe"}
         </button>
+        {existingRecipe ? (
+          <>
+            <button
+              type="button"
+              className="primary-button action-button"
+              onClick={handleEditRecipeCancel}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeleteRecipe(existingRecipe.id)}
+              className="primary-button action-button"
+            >
+              Delete
+            </button>
+          </>
+        ) : null}
       </div>
     </form>
   );
